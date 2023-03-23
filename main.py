@@ -5,8 +5,7 @@ import platform
 import ctypes
 from ctypes import *
 
-import pygame, sys
-import pygame as pg
+pygame = None
 
 
 from pygame.locals import *
@@ -237,21 +236,9 @@ class MainScanner:
                     screen.display_surface.fill((255, 255, 255))
 
 
-            
-        
-    
+if __name__ == "__main__":
+    screen = Screen()
+    mainScanner = MainScanner()
+    mainScanner.screen = screen
 
-
-
-
-
-
-
-
-
-
-screen = Screen()
-mainScanner = MainScanner()
-mainScanner.screen = screen
-
-mainScanner.start()
+    mainScanner.start()
