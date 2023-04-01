@@ -11,13 +11,14 @@ class ApiBot:
         "password": "password",
     }
 
-    def get_headers(self):
+    def get_headers(self,csrf = False):
         headers = {}
         if self.access_token:
             headers['Authorization'] = f'Bearer {self.access_token}'
-        csrftoken = self.get_csrf_token()
-        if csrftoken:
-            headers['X-CSRFToken'] = csrftoken
+        if csrf:
+            csrftoken = self.get_csrf_token()
+            if csrftoken:
+                headers['X-CSRFToken'] = csrftoken
         return headers
     
     def get_cookies(self):
@@ -36,7 +37,7 @@ class ApiBot:
 
     def get_access_token(self):
         url = f"{self.base_url}/api/token/"
-        response = requests.post(url, json=self.creds, headers = self.get_headers())
+        response = requests.post(url, json=self.creds, headers = self.get_headers(csrf=True))
         response.raise_for_status()
         self.access_token = response.json()["access"]
         self.refresh_token = response.json()["refresh"]
@@ -50,27 +51,30 @@ class ApiBot:
         self.refresh_token = response.json()["refresh"]
 
     def purchase_by_user(self,user=None, products = None):
-        url = f'{self.base_url}/api/purchase/order_by_bot'
-        headers = self.get_headers()
-        data = {
+        return self.protected_request(url = f'{self.base_url}/api/purchase/order_by_bot', data = {
             'user': user,
             'products': products,
-        }
-        response = requests.post(url, headers=headers, json=data, cookies=self.get_cookies())
+        },csrf=True)
+    
+    def protected_request(self,csrf = False,data={},*args,**kwargs):
+        headers = self.get_headers(csrf = csrf)
+        response = requests.post(headers=headers, json=data, cookies=self.get_cookies(), *args,**kwargs)
         if response.status_code == 401:
             self.refresh_access_token()
             headers = {"Authorization": f"Bearer {self.access_token}"}
-            response = requests.post(url, headers=headers, json=data, cookies=self.get_cookies())
+            response = requests.post(headers=headers, json=data, cookies=self.get_cookies(), *args,**kwargs)
         response.raise_for_status()
         return response.json()
     
-    def get_products_by_ids(self,ids):
-        url = f"{self.base_url}/api/products"
-        response = requests.get(url, params={
-            "ids": ids,
+    def get_products_by_ids(self,ids = []):
+        return self.protected_request(url = f'{self.base_url}/api/products', data = {
+            'ids':ids,
         })
-        response.raise_for_status()
-        return response.json()
+    
+    def get_user_data(self,user_id = None):
+        return self.protected_request(url = f'{self.base_url}/api/user_data_by_bot', data = {
+            "id": user_id,
+        })
 
 if __name__ == "__main__":
     a = ApiBot()

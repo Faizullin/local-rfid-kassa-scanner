@@ -141,13 +141,13 @@ class FaceDetector():
         time.sleep(delay)
         
     def detect_face(self,frame):
+        
         res=False
         rgb_frame = frame[:, :, ::-1]
-
+        
         # Find the face locations and encodings in the frame
         face_locations = face_recognition.face_locations(rgb_frame, model='hog')
         face_encodings = face_recognition.face_encodings(rgb_frame, face_locations, model='large')
-
         # Loop through each face in the frame and compare it to the pre-trained encodings
         for face_encoding, face_location in zip(face_encodings, face_locations):
 
@@ -157,7 +157,7 @@ class FaceDetector():
             best_match_index = np.argmin(face_distances)
             if matches[best_match_index]:
                 name = self.model['face_names'][best_match_index]
-                res = True
+                res = name
 
             # Draw a rectangle around the face and label it with the name
             top, right, bottom, left = face_location
@@ -170,7 +170,7 @@ class FaceDetector():
         return res,frame
 
     def load_faces(self):
-        with open("data/face_encodings.pickle", "rb") as f:
+        with open("./data/face_encodings.pickle", "rb") as f:
             face_encodings, face_names = pickle.load(f)
             self.model['face_encodings'] = face_encodings
             self.model['face_names'] = face_names

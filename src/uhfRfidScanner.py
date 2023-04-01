@@ -7,7 +7,7 @@ import ctypes
 pygame = None
 
 
-from pygame.locals import *
+from threading import Thread
 from ctypes import *
 
 import time
@@ -18,6 +18,8 @@ from .models import Product
 class UhdRfidScanner:
     PATH_TO_DRIVER = "./data/driver/raspberry/libCFComApi.so"
     PORT = "/dev/ttyUSB0"
+    current_data = {}
+    state = False
 
     def connect(self):
         self.Objdll = ctypes.cdll.LoadLibrary(self.PATH_TO_DRIVER)
@@ -27,30 +29,50 @@ class UhdRfidScanner:
         else:
             raise Exception("OpenError")
         self.Objdll.CFCom_ClearTagBuf()
-    
-    def update(self):
-        arrBuffer = bytes(9182)
-        iTagLength = c_int(0)
-        iTagNumber = c_int(0)
-        ret = self.Objdll.CFCom_GetTagBuf(arrBuffer, byref(iTagLength), byref(iTagNumber))
-        if iTagNumber.value > 0:
-            iIndex = int(0)
-            iLength = int(0)
-            bPackLength = c_byte(0)
-            
-            rfid_addresses = {}
-            for iIndex in range(0, iTagNumber.value):
-                bPackLength = arrBuffer[iLength]
-                str3 = ""
-                i = int(0)
-                for i in range(2, bPackLength - 1):
-                    str1 = hex(arrBuffer[1 + iLength + i])
-                    str3 = str3 + str1 + " "
-                if str3 in rfid_addresses.keys():
-                    rfid_addresses[str3] +=1
-                else:
-                    rfid_addresses[str3] = 1
-            print("Found",rfid_addresses)
-            return len(rfid_addresses.keys())>0,rfid_addresses
-        return False,None
+
+    def start(self):
+        Thread(target=self.run,daemon=True).start()
+    def run(self):
+
+        while True:
+            if not self.state:
+                time.sleep(0.5)
+                continue
+            self.current_data = {}
+            continue
+
+
+            arrBuffer = bytes(9182)
+            iTagLength = c_int(0)
+            iTagNumber = c_int(0)
+            ret = self.Objdll.CFCom_GetTagBuf(arrBuffer, byref(iTagLength), byref(iTagNumber))
+            if iTagNumber.value > 0:
+                iIndex = int(0)
+                iLength = int(0)
+                bPackLength = c_byte(0)
                 
+                rfid_addresses = {}
+                for iIndex in range(0, iTagNumber.value):
+                    bPackLength = arrBuffer[iLength]
+                    str3 = ""
+                    i = int(0)
+                    for i in range(2, bPackLength - 1):
+                        str1 = hex(arrBuffer[1 + iLength + i])
+                        str3 = str3 + str1 + " "
+                    if str3 in rfid_addresses.keys():
+                        rfid_addresses[str3] +=1
+                    else:
+                        rfid_addresses[str3] = 1
+                print("Found",rfid_addresses)
+                self.current_data = rfid_addresses
+
+    
+    def getCurrentData(self):
+        return self.current_data
+                
+
+    def on(self):
+        self.state = True
+
+    def off(self):
+        self.state = False

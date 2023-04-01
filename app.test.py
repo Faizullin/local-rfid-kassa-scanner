@@ -6,6 +6,7 @@ from src.camera import *
 from src.uhfRfidScanner import UhdRfidScanner
 from src.models import Product
 from src.apiBot import ApiBot
+from src.screen import ScreenWidget, QApplication
 
 class Ser:
     def die(self,text):
@@ -13,13 +14,7 @@ class Ser:
 
 
 ser = Ser()
-faceDetector = FaceDetector(config=config , ser=ser)
-uhdRfidScanner = UhdRfidScanner()
-uhdRfidScanner.connect()
-faceDetector.index = 1
-faceDetector.method = 1
-faceDetector.load_faces()
-faceDetector.on()
+
 
 
 
@@ -154,71 +149,96 @@ faceDetector.on()
 
 
 class App:
-    def __init__(self, master):
-        self.scanner = uhdRfidScanner
-        self.items = [
-            Product(1,"meat",12),
-            Product(2,"bread",12),
-            Product(3,"hallo",12),
-        ]
+    current_session_products = []
+    scanSatate = 0
+    hasClient = False
+    currentClient = None
+    processing = False
 
-        self.listbox = tk.Listbox(master)
-        self.scrollbar = tk.Scrollbar(master, orient=tk.VERTICAL, command=self.listbox.yview)
-        self.listbox.config(yscrollcommand=self.scrollbar.set)
+
+    def __init__(self):
+        self.faceDetector = FaceDetector(config=config , ser=ser)
+        self.uhdRfidScanner = UhdRfidScanner()
+        #self.uhdRfidScanner.connect()
+        self.uhdRfidScanner.start()
+        self.faceDetector.index = 1
+        self.faceDetector.method = 1
+        self.faceDetector.load_faces()
+        self.faceDetector.on()
+        self.apiBot = ApiBot()
+        self.apiBot.get_access_token()
+        self.screen = QApplication(sys.argv)
+        self.screenWidget = ScreenWidget(cameraDetector = self.faceDetector,update_video = self.update_video)
+        self.screenWidget.show()
+        self.screen.exec_()
+    
+    def purchase_products_by_user(self):
+        res = self.apiBot.purchase_by_user(user = self.currentClient,products=self.current_session_products)
+        print("res",res)
+
+
+    def getIdsFromUhfProducts(self,uhf_ids: dict):
+        return [i for i in uhf_ids.keys()]
+    
+    def update_video(self, frame):
+        frame = self.faceDetector.resize(frame, width=500)
+        detected, frame = self.faceDetector.detect_face(frame)
+        if detected:
+            self.hasClient = True
+            self.currentClient = detected
+            self.scanSatate = 0
+            self.uhdRfidScanner.on()
+        elif self.scanSatate > 4:
+            self.hasClient = False
+            self.scanSatate = 0
+            self.uhdRfidScanner.off()
+        else:
+            self.scanSatate += 1
+
+        if self.hasClient:
+            print("GET Products")
+            uhf_product_ids = self.uhdRfidScanner.getCurrentData()
+            if len(uhf_product_ids.keys() ) > 0:
+                product_ids = self.getIdsFromUhfProducts(uhf_product_ids)
+                for product_id in product_ids:
+                    if not product_id in self.current_session_products.keys():
+                        self.current_session_products[product_id] = 1
+                    else:
+                        self.current_session_products[product_id] += 1
+                products = self.apiBot.get_products_by_ids(ids = product_ids)
+                print(products)
+                #self.screen_update(products)
+        return frame
         
-        # Add items to the listbox
-        for item in self.items:
-            item_frame = tk.Frame(master)
-            item_frame.pack(side=tk.TOP, fill=tk.X)
-           
-            label = tk.Label(item_frame, text=item.name)
-            label.pack(side=tk.LEFT)
-            remove_button = tk.Button(item_frame, text="Remove",  command=lambda obj=item: self.listbox.delete(self.listbox.get(0, tk.END).index(obj.name)))
-            remove_button.pack(side=tk.RIGHT)
-            self.listbox.insert(tk.END, item.name)           
-
-
-        self.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
-        self.video = faceDetector
-
-
-        self.frame = tk.Frame(master, width=1500, height=1100)
-        self.frame.pack_propagate(0)
-        self.frame.pack(side=tk.TOP, anchor=tk.NE)
-        self.canvas = tk.Canvas(self.frame, width=1200, height=900)
-        self.canvas.pack()
-
-        self.update_video()
-
-
-    def update_video(self):
-        ret, frame = self.video.read()
-        if ret:
-            frame = self.video.resize(frame, width=500)
-            detected,frame = self.video.detect_face(frame)
-            if detected:
-                print("GET Products")
-                self.scanner.update()
-
-
-
-
-            img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            img = Image.fromarray(img)
-            img_tk = ImageTk.PhotoImage(img)
-            self.canvas.create_image(0, 0, image=img_tk, anchor=tk.NW)
-            self.canvas.img_tk = img_tk
+    def add_product(self, product):
+        item_frame = tk.Frame(self.master)
+        item_frame.pack(side=tk.TOP, fill=tk.X)
         
-        # Schedule the next update
-        self.canvas.after(10, self.update_video)
-        
-    def remove_item(self, index):
-        del self.items[index]
+        label = tk.Label(item_frame, text=product.name)
+        label.pack(side=tk.LEFT)
+        remove_button = tk.Button(item_frame, text="Remove",  command=lambda obj=product: self.remove_product(obj))
+        remove_button.pack(side=tk.RIGHT)
+        increase_button = tk.Button(item_frame, text="+",  command=lambda obj=product: self.increase_button(obj))
+        increase_button.pack(side=tk.RIGHT)
+        decrease_button = tk.Button(item_frame, text="-",  command=lambda obj=product: self.decrease_button(obj))
+        decrease_button.pack(side=tk.RIGHT)
+        self.listbox.insert(tk.END, product.name)
+
+    def remove_product(self, index):
+        self.current_session_products.remove()
         self.listbox.delete(index)
+        #self.listbox.delete(self.listbox.get(0, tk.END).index(obj.name))
 
-root = tk.Tk()
-app = App(root)
-root.mainloop()
-faceDetector.off()
+    def increase_button(self,product: Product):
+        product.quantity += 1
+        pass
+    def decrease_button(self,product: Product):
+        if product.quantity <= 1:
+            product.quantity = 1
+        else:
+            product.quantity -= 1
+
+    def __del__(self):
+        self.faceDetector.off()
+
+app = App()
