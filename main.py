@@ -1,5 +1,5 @@
 import cv2,time,sys
-from PIL import Image, ImageTk
+
 import config
 from src.camera import *
 from src.uhfRfidScanner import UhdRfidScanner
@@ -26,10 +26,10 @@ class App:
         self.faceDetector = FaceDetector(config=config , ser=ser)
         self.uhdRfidScanner = UhdRfidScanner()
         self.db = ProductDatabase('db.sqlite3')
-        self.uhdRfidScanner.test = True #--------TEST
+        self.uhdRfidScanner.test = False #--------TEST
         self.uhdRfidScanner.connect()
         self.uhdRfidScanner.start()
-        self.faceDetector.index = 1
+        self.faceDetector.index = 0
         self.faceDetector.method = 1
         self.faceDetector.load_faces()
         self.faceDetector.on()
@@ -37,7 +37,7 @@ class App:
 
 
         self.apiBot = ApiBot()
-        self.apiBot.test = True  #--------TEST
+        self.apiBot.test = False  #--------TEST
         self.apiBot.get_access_token()
         self.screen = QApplication(sys.argv)
         self.screenWidget = ScreenWidget(cameraDetector = self.faceDetector,update_video = self.update_video , keyPressEvent = self.keyPressEvent)
@@ -76,9 +76,11 @@ class App:
 
         if self.hasClient:
             uhf_product_ids = self.uhdRfidScanner.getCurrentData()
-            print("Current Products", uhf_product_ids)
+            print("Current UHF", uhf_product_ids)
+
             if len(uhf_product_ids.keys() ) > 0:
                 products = self.db.select_all_by_ids(uhf_ids = uhf_product_ids.keys())
+                print("Current Products", uhf_product_ids,products)
                 to_update_list = False
                 for product in products:
                     if not product.id in self.current_session_products.keys():

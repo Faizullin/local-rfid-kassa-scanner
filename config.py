@@ -14,11 +14,11 @@ if res and "." in res and m:
     
 #ENABLE_ACCOUNT = 'https://myaccount.google.com/lesssecureapps?pli=1&rapt=AEjHL4OCX7qsNoB5qwZmOXuzjiyqPPY65E6x-NCYKREntcOhDo8tBWgQU0kPqTccNDabUzDNZ2lPYMz0LGGSPL7JMfhb77-Ueg'
 PATHS={
-    "db":"data/db/main.db",
-    'events':'data/config/events.txt',
-    'info':'data/config/info.json',
-    "DCIM":"data/DCIM/",
-    'faces_path': "data/models.faces.pickle",
+    "db":"/home/adminu/Desktop/uhf/local-rfid-kassa-scannerdata/db/main.db",
+    'events':'/home/adminu/Desktop/uhf/local-rfid-kassa-scannerdata/config/events.txt',
+    'info':'/home/adminu/Desktop/uhf/local-rfid-kassa-scannerdata/config/info.json',
+    "DCIM":"/home/adminu/Desktop/uhf/local-rfid-kassa-scannerdata/DCIM/",
+    'faces_path': "/home/adminu/Desktop/uhf/local-rfid-kassa-scannerdata/models.faces.pickle",
     "urls":{
         #"esp":f"http://192.168.{ip}.7/",
         'imgin' : ip_camera,

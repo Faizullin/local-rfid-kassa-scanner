@@ -16,7 +16,7 @@ from .models import Product
 
 
 class UhdRfidScanner:
-    PATH_TO_DRIVER = "./data/driver/raspberry/libCFComApi.so"
+    PATH_TO_DRIVER = "/home/adminu/Desktop/uhf/local-rfid-kassa-scanner/data/driver/raspberry/libCFComApi.so"
     PORT = "/dev/ttyUSB0"
     current_data = {}
     state = False
@@ -71,6 +71,7 @@ class UhdRfidScanner:
                         rfid_addresses[str3] = 1
                 print("Found",rfid_addresses)
                 self.current_data = rfid_addresses
+                time.sleep(0.6)
 
     def getCurrentData(self):
         return self.current_data.copy()
@@ -80,3 +81,4 @@ class UhdRfidScanner:
 
     def off(self):
         self.state = False
+

@@ -89,7 +89,6 @@ class FaceDetector():
 
     def off(self):
         self.state = False;
-        cv2.destroyAllWindows();
 
     def start(self):
         Thread(target = self.run,daemon=True).start()
@@ -163,10 +162,11 @@ class FaceDetector():
         return res,frame
 
     def load_faces(self):
-        with open("./data/face_encodings.pickle", "rb") as f:
+        with open("/home/adminu/Desktop/uhf/local-rfid-kassa-scanner/data/face_encodings.pickle", "rb") as f:
             face_encodings, face_names = pickle.load(f)
             self.model['face_encodings'] = face_encodings
             self.model['face_names'] = face_names
-
+    # def __del__(self):
+    #     cv2.destroyAllWindows();
 
     

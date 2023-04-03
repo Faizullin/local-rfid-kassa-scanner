@@ -3,7 +3,7 @@ import os
 import pickle,cv2
 
 # Define the path to the directory containing the face images
-faces_dir = "data\\train_face"
+faces_dir = "/home/adminu/Desktop/uhf/local-rfid-kassa-scanner/data/train_face"
 
 # Create lists to store the face encodings and corresponding names
 train_face_encodings = []
@@ -29,6 +29,6 @@ for filename in os.listdir(faces_dir):
         train_face_names.append(filename.split(".")[0])
 
 
-with open("data\\face_encodings.pickle", "wb") as f:
+with open("/home/adminu/Desktop/uhf/local-rfid-kassa-scanner/data/face_encodings.pickle", "wb") as f:
     print("Data",train_face_names,len(train_face_encodings))
     pickle.dump((train_face_encodings, train_face_names), f)

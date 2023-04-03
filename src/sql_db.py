@@ -48,6 +48,7 @@ class ProductDatabase(Database):
         self.conn.commit()
 
     def select_all_by_ids(self, uhf_ids= []):
+        uhf_ids = [f"'{i}'" for i in uhf_ids]
         query = f"SELECT `id`,`name`,`price`,`image`,`uhf_id` FROM 'shop_app_product' WHERE uhf_id in ({','.join(uhf_ids)})"
         self.c.execute(query)
         items = self.c.fetchall()
