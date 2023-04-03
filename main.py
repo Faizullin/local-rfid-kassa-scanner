@@ -45,13 +45,13 @@ class App:
         self.screen.exec_()
     
     def purchase_products_by_user(self):
-        data = []
+        products_data = []
         for key in  self.current_session_products.keys():
-            data.append({
-                'quantity': 1,
+            products_data.append({
+                'qty': 1,
                 'id': key,
             })
-        res = self.apiBot.purchase_by_user(user = self.currentClient,products=data)
+        res = self.apiBot.purchase_by_user(user = self.currentClient,products=products_data)
         print("res",res)
 
 
