@@ -1,4 +1,5 @@
 import sqlite3,math
+from .models import Product
 
 class Database:
     def __init__(self, db_name = "db.db"):
@@ -46,11 +47,13 @@ class ProductDatabase(Database):
         self.c.execute(query)
         self.conn.commit()
 
-    def select_all_by_ids(self, uhf_ids):
-        query = f"SELECT * FROM 'shop_app_product' WHERE uhf_id in ({','.join(uhf_ids)})"
+    def select_all_by_ids(self, uhf_ids= []):
+        query = f"SELECT `id`,`name`,`price`,`image`,`uhf_id` FROM 'shop_app_product' WHERE uhf_id in ({','.join(uhf_ids)})"
         self.c.execute(query)
         items = self.c.fetchall()
         result = []
         for item in items:
-            result.append({'id': item[0], 'title': item[1], 'description': item[2], 'body': item[3],'image': item[4]})
+            if not item[4]:
+                item[4] = ''
+            result.append(Product(id=str(item[0]),name=item[1],price=item[2],image_url=item[3], uhf_id=str(item[4])))
         return result

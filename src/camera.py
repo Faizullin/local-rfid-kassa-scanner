@@ -62,6 +62,7 @@ class LocalCamera(Camera):
 
 class FaceDetector():
     current_frame = None
+    current_client_face = None
     camera_index = 0
     state=False
     method = 1
@@ -90,15 +91,16 @@ class FaceDetector():
         self.state = False;
         cv2.destroyAllWindows();
 
+    def start(self):
+        Thread(target = self.run,daemon=True).start()
+
     def run(self):
         while True:
             if not self.state:
                 time.sleep(1)
                 continue
-            ret,frame = self.devices[self.index].read()
-
+            ret,frame = self.read()
             if not ret: 
-                self.ser.die("No frame")
                 continue
             frame = self.resize(frame, width=500)
             if self.method == 0:
@@ -107,28 +109,21 @@ class FaceDetector():
             else:
                 detected=False
                 if self.method == 1:
-                    detected,frame = self.detect_face(frame)
-                    self.current_frame = frame
-                    if detected:
-                        print(f"Found {detected}")
+                    self.current_client_face, self.current_frame = self.detect_face(frame)
                 if self.delay:
                     self.sleep(self.delay)
-                if detected!=False:
-                    pass
-            # cv2.imshow("FRAME",frame)
-            # if cv2.waitKey(1) == ord('q'):
-            #     self.off()
-            #     return
 
+
+    def getCurrentFace(self):
+        return self.current_client_face, self.current_frame
 
     def read(self):
-        #return self.current_frame is not None, self.current_frame
         ret,frame = self.devices[self.index].read()
         if not ret: 
             self.ser.die("No frame")
             self.off()
             return False,None
-        return ret,frame;
+        return ret,frame
 
     def resize(self,img,width=None,inter=cv2.INTER_AREA):
         (h,w)=img.shape[:2]
@@ -163,8 +158,6 @@ class FaceDetector():
             top, right, bottom, left = face_location
             cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
             cv2.putText(frame, name, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            
-
             
         
         return res,frame

@@ -13,15 +13,13 @@ class ListWidgetItem(QListWidgetItem):
         self.setText(text)
 
 class ScreenWidget(QWidget):
-    def __init__(self, cameraDetector = None, update_video = None):
+    def __init__(self, cameraDetector = None, update_video = None, keyPressEvent = None):
         super().__init__()
+
+        self.keyPressEvent = keyPressEvent
 
         self.list_widget = QListWidget()
         self.list_widget.setSpacing(10)
-
-        for i in range(20):
-            self.add_item(Product(i,f'Product {i}',12))
-            
 
         self.list_layout = QHBoxLayout()
         self.list_layout.addWidget(self.list_widget)
@@ -46,9 +44,8 @@ class ScreenWidget(QWidget):
         self.timer.start(50)
 
     def update_frame(self):
-        ret, frame = self.cameraDetector.read()
+        ret, frame = self.update_video()
         if ret:
-            frame = self.update_video(frame)
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             h, w, c = frame.shape
             q_img = QPixmap.fromImage(QImage(frame.data, w, h, c*w, QImage.Format_RGB888))
@@ -60,14 +57,20 @@ class ScreenWidget(QWidget):
         q_img = QPixmap.fromImage(QImage(frame.data, w, h, c*w, QImage.Format_RGB888))
         self.video_label.setPixmap(q_img)
 
+    def updateProductsList(self,productsDict: dict = {}):
+        self.list_widget.clear()
+        for key, product in productsDict.items():
+            self.add_item(product=product)
+
     def add_item(self, product: Product = None):
         
         item_data = {'imagel': 'https://upload.wikimedia.org/wikipedia/en/a/a9/Example.jpg','title':"Unknown",'quantity':0}
         if not product:
             product = item_data
-        pixmap = QPixmap(product.imageUrl)
-        imgData = urllib.request.urlopen(product.imageUrl).read()
-        pixmap.loadFromData(imgData)
+        pixmap = QPixmap(product.image_url)
+        if product.imageUrl:
+            imgData = urllib.request.urlopen(product.image_url).read()
+            pixmap.loadFromData(imgData)
 
         # Create a new widget for the list item
         widget = QWidget()
@@ -104,10 +107,11 @@ class ScreenWidget(QWidget):
         self.list_widget.addItem(item)
         self.list_widget.setItemWidget(item, widget)
 
+        if product.imageUrl:
             # Load the image asynchronously
-        request = QNetworkRequest(QUrl(product.imageUrl))
-        request.setAttribute(QNetworkRequest.User, image_label)
-        self.network_manager.get(request)
+            request = QNetworkRequest(QUrl(product.image_url))
+            request.setAttribute(QNetworkRequest.User, image_label)
+            self.network_manager.get(request)
     
     def remove_item(self, product: Product):
         item = ListWidgetItem(product.name)

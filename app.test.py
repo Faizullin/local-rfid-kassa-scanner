@@ -34,50 +34,51 @@ class MyWindow(QMainWindow):
         self.network_manager.finished.connect(self.handle_image_loaded)
         # Add the items to the list
         for item_data in items:
+            self.add_item(item_data)
             # Load the image from a URL
-            pixmap = QPixmap(item_data['image_url'])
-            imgData = urllib.request.urlopen(item_data['image_url']).read()
-            pixmap.loadFromData(imgData)
+            # pixmap = QPixmap(item_data['image_url'])
+            # imgData = urllib.request.urlopen(item_data['image_url']).read()
+            # pixmap.loadFromData(imgData)
 
-            # Create a new widget for the list item
-            widget = QWidget()
-            layout = QHBoxLayout()
+            # # Create a new widget for the list item
+            # widget = QWidget()
+            # layout = QHBoxLayout()
 
-            # Create a label for the image
-            image_label = QLabel()
-            image_label.setPixmap(pixmap)
-            layout.addWidget(image_label)
+            # # Create a label for the image
+            # image_label = QLabel()
+            # image_label.setPixmap(pixmap)
+            # layout.addWidget(image_label)
 
-            # Create a label for the text
-            text_label = QLabel(item_data['name'])
-            layout.addWidget(text_label)
+            # # Create a label for the text
+            # text_label = QLabel(item_data['name'])
+            # layout.addWidget(text_label)
 
-            # Create a label for the count
-            count_label = QLabel(str(item_data['count']))
-            layout.addWidget(count_label)
+            # # Create a label for the count
+            # count_label = QLabel(str(item_data['count']))
+            # layout.addWidget(count_label)
 
-            # Create the increment button
-            increment_button = QPushButton('+')
-            increment_button.clicked.connect(lambda _, label=count_label: self.increment_count(label))
-            layout.addWidget(increment_button)
+            # # Create the increment button
+            # increment_button = QPushButton('+')
+            # increment_button.clicked.connect(lambda _, label=count_label: self.increment_count(label))
+            # layout.addWidget(increment_button)
 
-            # Create the decrement button
-            decrement_button = QPushButton('-')
-            decrement_button.clicked.connect(lambda _, label=count_label: self.decrement_count(label))
-            layout.addWidget(decrement_button)
+            # # Create the decrement button
+            # decrement_button = QPushButton('-')
+            # decrement_button.clicked.connect(lambda _, label=count_label: self.decrement_count(label))
+            # layout.addWidget(decrement_button)
 
-            widget.setLayout(layout)
+            # widget.setLayout(layout)
 
-            # Add the widget to the list
-            item = QListWidgetItem()
-            item.setSizeHint(widget.sizeHint())
-            self.list_widget.addItem(item)
-            self.list_widget.setItemWidget(item, widget)
+            # # Add the widget to the list
+            # item = QListWidgetItem()
+            # item.setSizeHint(widget.sizeHint())
+            # self.list_widget.addItem(item)
+            # self.list_widget.setItemWidget(item, widget)
 
-             # Load the image asynchronously
-            request = QNetworkRequest(QUrl(item_data['image_url']))
-            request.setAttribute(QNetworkRequest.User, image_label)
-            self.network_manager.get(request)
+            #  # Load the image asynchronously
+            # request = QNetworkRequest(QUrl(item_data['image_url']))
+            # request.setAttribute(QNetworkRequest.User, image_label)
+            # self.network_manager.get(request)
 
         # Set the list widget as the central widget of the window
         self.setCentralWidget(self.list_widget)
@@ -153,10 +154,9 @@ class MyWindow(QMainWindow):
         self.network_manager.get(request)
 
     def keyPressEvent(self, event):
-        print("J",event.key(),Qt.Key_Space)
-        self.add_item()
-        # if event.key() == Qt.Key_Space:
-        #     self.add_item()
+        print("J",event.key(),Qt.Key_Enter )
+        if event.key() == 16777220:
+            self.add_item()
 
 if __name__ == '__main__':
     # Create the application and window

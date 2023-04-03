@@ -10,6 +10,7 @@ class ApiBot:
         "email": "bot@example.com",
         "password": "password",
     }
+    test = False
 
     def get_headers(self,csrf = False):
         headers = {}
@@ -36,6 +37,10 @@ class ApiBot:
         return None
 
     def get_access_token(self):
+        if self.test:
+            self.access_token = 'access'
+            self.refresh_token = 'refresh'
+            return
         url = f"{self.base_url}/api/token/"
         response = requests.post(url, json=self.creds, headers = self.get_headers(csrf=True))
         response.raise_for_status()
@@ -51,6 +56,9 @@ class ApiBot:
         self.refresh_token = response.json()["refresh"]
 
     def purchase_by_user(self,user=None, products = None):
+        if self.test:
+            print(f"Succesfully purchased for user: {user}\n products: [{products}]")
+            return
         return self.protected_request(url = f'{self.base_url}/api/purchase/order_by_bot', data = {
             'user': user,
             'products': products,

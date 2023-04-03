@@ -20,8 +20,12 @@ class UhdRfidScanner:
     PORT = "/dev/ttyUSB0"
     current_data = {}
     state = False
+    test = False
 
     def connect(self):
+        if self.test:
+            print("OpenSuccess")
+            return
         self.Objdll = ctypes.cdll.LoadLibrary(self.PATH_TO_DRIVER)
         print(self.Objdll)
         if self.Objdll.CFCom_OpenDevice(self.PORT.encode(), 115200) == 1:   # COM$
@@ -32,15 +36,17 @@ class UhdRfidScanner:
 
     def start(self):
         Thread(target=self.run,daemon=True).start()
+        
     def run(self):
-
         while True:
             if not self.state:
                 time.sleep(0.5)
                 continue
             self.current_data = {}
-            continue
-
+            if self.test:
+                self.current_data = {'1':1,'2':1}
+                time.sleep(2)
+                continue
 
             arrBuffer = bytes(9182)
             iTagLength = c_int(0)
@@ -66,10 +72,8 @@ class UhdRfidScanner:
                 print("Found",rfid_addresses)
                 self.current_data = rfid_addresses
 
-    
     def getCurrentData(self):
-        return self.current_data
-                
+        return self.current_data.copy()
 
     def on(self):
         self.state = True
