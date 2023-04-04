@@ -1,3 +1,4 @@
+import cv2
 from PyQt5 import QtCore, QtGui, QtWidgets
 import urllib.request
 from PyQt5.QtCore import Qt, QTimer
@@ -14,7 +15,7 @@ class ListWidgetItem(QListWidgetItem):
         self.setText(text)
 
 class ScreenWidget(QWidget):
-    def __init__(self, ui ,frame, update_video = None, keyPressEvent = None):
+    def __init__(self, ui ,frame, keyPressEvent = None):
         super().__init__(frame)
 
         self.ui = ui
@@ -42,8 +43,6 @@ class ScreenWidget(QWidget):
 
         self.setLayout(self.main_layout)
 
-        self.update_video = update_video
-
         for _ in range(2):
             self.add_item()
 
@@ -70,7 +69,7 @@ class ScreenWidget(QWidget):
         for key, product in productsDict.items():
             self.add_item(product=product)
 
-    def add_item(self, product: Product):
+    def add_item(self, product: Product = None):
         if not product:
             product = Product(id=0, name='Unknown',price=132,image_url='https://thumbs.dreamstime.com/b/meat-vector-illustration-white-background-30463413.jpg')
 
@@ -89,7 +88,6 @@ class ScreenWidget(QWidget):
         total_price_label = QLabel(str(total_price))
         layout.addWidget(total_price_label)
 
-        print('add',total_price,'to',int(self.ui.total_price_label.text()))
         self.ui.total_price_label.setText(str( int(self.ui.total_price_label.text()) + total_price ))
 
         count_label = QLabel(str(product.quantity))
@@ -201,10 +199,10 @@ class Ui_MainWindow(object):
         self.total_price_label.setObjectName("total_price_label")
         self.total_price_label.setText('0')
         #self.widget = QtWidgets.QWidget(self.frame_2)
-        self.widget = ScreenWidget(self, self.frame_2)
+        self.widget = None#ScreenWidget(self, self.frame_2)
 
-        self.widget.setGeometry(QtCore.QRect(0, 60, 961, 501))
-        self.widget.setObjectName("widget")
+        #self.widget.setGeometry(QtCore.QRect(0, 60, 961, 501))
+        #self.widget.setObjectName("widget")
         self.verticalLayout.addWidget(self.frame_2)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)

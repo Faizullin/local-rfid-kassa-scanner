@@ -2,6 +2,8 @@ from urllib.request import urlopen
 import numpy as np, config
 import datetime,requests,sys,face_recognition,os,cv2,time,pickle
 from threading import Thread
+from .models import User
+from .sql_db import UserDatabase
 
 __all__=['WebCamera','LocalCamera','FaceDetector']
 
@@ -63,6 +65,7 @@ class LocalCamera(Camera):
 class FaceDetector():
     current_frame = None
     current_client_face = None
+    prev_client_face_id = None
     camera_index = 0
     state=False
     method = 1
@@ -82,6 +85,7 @@ class FaceDetector():
             else:
                 raise Exception("wrong camera path/index");
         self.faces_path = config.PATHS['faces_path']
+        self.db = UserDatabase()
         print(self.devices)
         
     def on(self):
@@ -114,7 +118,10 @@ class FaceDetector():
 
 
     def getCurrentFace(self):
-        return self.current_client_face, self.current_frame
+        ret_frame = None
+        if self.current_frame is not None:
+            ret_frame = self.resize(self.current_frame, width=960)  
+        return self.current_client_face, ret_frame
 
     def read(self):
         ret,frame = self.devices[self.index].read()
@@ -149,14 +156,26 @@ class FaceDetector():
             name="Unknown"
             face_distances = face_recognition.face_distance(self.model['face_encodings'],face_encoding)
             best_match_index = np.argmin(face_distances)
+            
             if matches[best_match_index]:
-                name = self.model['face_names'][best_match_index]
-                res = name
+                id = self.model['face_names'][best_match_index]
+                if self.prev_client_face_id:
+                    if self.prev_client_face_id == id:
+                        pass
+                    else:
+                        self.current_client_face = self.db.select_data_by_id(id)
+                        self.prev_client_face_id = id
+                        name = self.current_client_face.name
+                else:
+                    self.current_client_face = self.db.select_data_by_id(id=id)
+                    self.prev_client_face_id = id
+                    name = self.current_client_face.name
+                res = self.current_client_face
 
             # Draw a rectangle around the face and label it with the name
             top, right, bottom, left = face_location
             cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
-            cv2.putText(frame, name, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            cv2.putText(frame, name , (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             
         
         return res,frame

@@ -26,10 +26,10 @@ class App:
         self.faceDetector = FaceDetector(config=config , ser=ser)
         self.uhdRfidScanner = UhdRfidScanner()
         self.db = ProductDatabase('db.sqlite3')
-        self.uhdRfidScanner.test = False
+        self.uhdRfidScanner.test = True
         self.uhdRfidScanner.connect()
         self.uhdRfidScanner.start()
-        self.faceDetector.index = 0
+        self.faceDetector.index = 1
         self.faceDetector.method = 1
         self.faceDetector.load_faces()
         self.faceDetector.on()
@@ -37,16 +37,18 @@ class App:
 
 
         self.apiBot = ApiBot()
-        self.apiBot.test = False  #--------TEST
+        self.apiBot.test = True  #--------TEST
         self.apiBot.get_access_token()
         self.screen = QApplication(sys.argv)
         self.MainWindow = QtWidgets.QMainWindow()
         ui = Ui_MainWindow()
         ui.setupUi(self.MainWindow)
-        ui.widget = ScreenWidget(cameraDetector = self.faceDetector,update_video = self.update_video , keyPressEvent = self.keyPressEvent)
+        ui.widget = ScreenWidget(ui, ui.frame_2, keyPressEvent = self.keyPressEvent)
+        ui.widget.setGeometry(QtCore.QRect(0, 60, 961, 501))
+        ui.widget.update_video = self.update_video
 
     def start(self):
-        MainWindow.show()
+        self.MainWindow.show()
         sys.exit(self.screen.exec_())
     
     def purchase_products_by_user(self):
@@ -56,7 +58,7 @@ class App:
                 'qty': 1,
                 'id': key,
             })
-        res = self.apiBot.purchase_by_user(user = self.currentClient,products=products_data)
+        res = self.apiBot.purchase_by_user(user = self.currentClient.id ,products=products_data)
         print("res",res)
 
 

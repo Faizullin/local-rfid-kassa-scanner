@@ -1,6 +1,6 @@
 import subprocess as sp
 import socket, os
-ip_camera = "http://192.168.1.101:8080/shot.jpg"
+ip_camera = "http://192.168.1.103:8080/shot.jpg"
 
 
 

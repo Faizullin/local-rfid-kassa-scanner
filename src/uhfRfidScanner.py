@@ -24,7 +24,7 @@ class UhdRfidScanner:
     test = False
 
     def __init__(self):
-        self.PATH_TO_DRIVER = config.PATHS['DRIVER']
+        self.PATH_TO_DRIVER = config.PATHS['driver']
 
     def connect(self):
         if self.test:

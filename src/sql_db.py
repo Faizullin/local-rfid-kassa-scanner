@@ -1,5 +1,5 @@
 import sqlite3,math
-from .models import Product
+from .models import Product, User
 
 class Database:
     def __init__(self, db_name = "db.db"):
@@ -58,3 +58,16 @@ class ProductDatabase(Database):
                 item[4] = ''
             result.append(Product(id=str(item[0]),name=item[1],price=item[2],image_url=item[3], uhf_id=str(item[4])))
         return result
+
+class UserDatabase(Database):
+    def create_table(self):
+        columns = []
+        query = f"CREATE TABLE IF NOT EXISTS 'shop_app_customuser' ({', '.join(columns)})"
+        self.c.execute(query)
+        self.conn.commit()
+
+    def select_data_by_id(self, id = None):
+        query = f"SELECT `id`,`name` FROM 'shop_app_customuser' WHERE id={id}"
+        self.c.execute(query)
+        item = self.c.fetchone()
+        return User(id=item[0], name=item[1])
