@@ -19,6 +19,8 @@ PATHS={
     'info':'/home/adminu/Desktop/uhf/local-rfid-kassa-scannerdata/config/info.json',
     "DCIM":"/home/adminu/Desktop/uhf/local-rfid-kassa-scannerdata/DCIM/",
     'faces_path': "/home/adminu/Desktop/uhf/local-rfid-kassa-scannerdata/models.faces.pickle",
+    'driver':"/home/adminu/Desktop/uhf/local-rfid-kassa-scanner/data/driver/raspberry/libCFComApi.so",
+    'train_model': "/home/adminu/Desktop/uhf/local-rfid-kassa-scanner/data/face_encodings.pickle",
     "urls":{
         #"esp":f"http://192.168.{ip}.7/",
         'imgin' : ip_camera,

@@ -5,7 +5,7 @@ from src.camera import *
 from src.uhfRfidScanner import UhdRfidScanner
 from src.models import Product
 from src.apiBot import ApiBot
-from src.screen import ScreenWidget, QApplication
+from src.screen import *
 from src.sql_db import ProductDatabase
 
 class Ser:
@@ -40,9 +40,14 @@ class App:
         self.apiBot.test = False  #--------TEST
         self.apiBot.get_access_token()
         self.screen = QApplication(sys.argv)
-        self.screenWidget = ScreenWidget(cameraDetector = self.faceDetector,update_video = self.update_video , keyPressEvent = self.keyPressEvent)
-        self.screenWidget.show()
-        self.screen.exec_()
+        self.MainWindow = QtWidgets.QMainWindow()
+        ui = Ui_MainWindow()
+        ui.setupUi(self.MainWindow)
+        ui.widget = ScreenWidget(cameraDetector = self.faceDetector,update_video = self.update_video , keyPressEvent = self.keyPressEvent)
+
+    def start(self):
+        MainWindow.show()
+        sys.exit(self.screen.exec_())
     
     def purchase_products_by_user(self):
         products_data = []
@@ -119,5 +124,7 @@ class App:
 
     def __del__(self):
         self.faceDetector.off()
+
 if __name__ == '__main__':
     app = App()
+    app.start()

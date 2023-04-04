@@ -1,5 +1,5 @@
 from urllib.request import urlopen
-import numpy as np;
+import numpy as np, config
 import datetime,requests,sys,face_recognition,os,cv2,time,pickle
 from threading import Thread
 
@@ -162,7 +162,7 @@ class FaceDetector():
         return res,frame
 
     def load_faces(self):
-        with open("/home/adminu/Desktop/uhf/local-rfid-kassa-scanner/data/face_encodings.pickle", "rb") as f:
+        with open(config.PATHS['train_model'], "rb") as f:
             face_encodings, face_names = pickle.load(f)
             self.model['face_encodings'] = face_encodings
             self.model['face_names'] = face_names

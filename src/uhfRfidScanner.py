@@ -13,14 +13,18 @@ from ctypes import *
 import time
 from datetime import datetime
 from .models import Product
+import config
 
 
 class UhdRfidScanner:
-    PATH_TO_DRIVER = "/home/adminu/Desktop/uhf/local-rfid-kassa-scanner/data/driver/raspberry/libCFComApi.so"
+    PATH_TO_DRIVER = ""
     PORT = "/dev/ttyUSB0"
     current_data = {}
     state = False
     test = False
+
+    def __init__(self):
+        self.PATH_TO_DRIVER = config.PATHS['DRIVER']
 
     def connect(self):
         if self.test:
