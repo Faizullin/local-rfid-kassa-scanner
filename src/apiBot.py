@@ -85,20 +85,13 @@ class ApiBot:
         })
 
 if __name__ == "__main__":
-    a = ApiBot()
-    a.get_access_token()
-    import time
-    t1 = time.time()
-    aa = a.purchase_by_user(user = 3, products=[
-        {
-        'id':11,
-        'qty':2,
-        },
-        {
-        'id':11,
-        },
-    ])
-    t2 = time.time()
-    print(a.get_products_by_ids([1,3]))
-    t3 = time.time()
-    print(t2-t1,t3-t2)
+    url = 'http://127.0.0.1:8000/api/download-db'
+    filename = 'database.db'
+
+    response = requests.get(url)
+    if response.status_code == 200:
+        with open(filename, 'wb') as f:
+            f.write(response.content)
+            print(f'Downloaded {filename} successfully.')
+    else:
+        print(f'Error downloading {filename}: {response.status_code}')

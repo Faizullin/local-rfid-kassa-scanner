@@ -26,7 +26,7 @@ class App:
         self.faceDetector = FaceDetector(config=config , ser=ser)
         self.uhdRfidScanner = UhdRfidScanner()
         self.db = ProductDatabase('db.sqlite3')
-        self.uhdRfidScanner.test = False #--------TEST
+        self.uhdRfidScanner.test = False
         self.uhdRfidScanner.connect()
         self.uhdRfidScanner.start()
         self.faceDetector.index = 0
