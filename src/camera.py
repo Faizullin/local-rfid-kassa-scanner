@@ -98,6 +98,7 @@ class FaceDetector():
         Thread(target = self.run,daemon=True).start()
 
     def run(self):
+        self.db = UserDatabase()
         while True:
             if not self.state:
                 time.sleep(1)

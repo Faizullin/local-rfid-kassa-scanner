@@ -2,7 +2,7 @@ import sqlite3,math
 from .models import Product, User
 
 class Database:
-    def __init__(self, db_name = "db.db"):
+    def __init__(self, db_name = "db.sqlite3"):
         self.conn = sqlite3.connect(db_name)
         self.c = self.conn.cursor()
 
@@ -67,7 +67,7 @@ class UserDatabase(Database):
         self.conn.commit()
 
     def select_data_by_id(self, id = None):
-        query = f"SELECT `id`,`name` FROM 'shop_app_customuser' WHERE id={id}"
-        self.c.execute(query)
+        query = f"SELECT `id`,`username` FROM 'shop_app_customuser' WHERE id = ?"
+        self.c.execute(query,(id,))
         item = self.c.fetchone()
         return User(id=item[0], name=item[1])
