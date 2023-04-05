@@ -73,7 +73,7 @@ class UhdRfidScanner:
                         rfid_addresses[str3] +=1
                     else:
                         rfid_addresses[str3] = 1
-                print("Found",rfid_addresses)
+                #print("Found",rfid_addresses)
                 self.current_data = rfid_addresses
                 time.sleep(0.6)
 

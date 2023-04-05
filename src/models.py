@@ -11,7 +11,7 @@ class Product:
         self.id = id
         self.name = name
         self.price = price
-        self.image_url = image_url
+        self.image_url = 'https://rfid-kassa.com/media/'+image_url
         self.uhf_id= uhf_id
 
     def get_image_url(self):

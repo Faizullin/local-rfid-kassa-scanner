@@ -1,6 +1,6 @@
 import cv2
 from PyQt5 import QtCore, QtGui, QtWidgets
-import urllib.request
+import urllib.request, requests
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtWidgets import QApplication, QWidget, QListWidget, QListWidgetItem, QHBoxLayout, QLabel, QMessageBox, QPushButton,QVBoxLayout, QSizePolicy
@@ -32,8 +32,9 @@ class ScreenWidget(QWidget):
 
         self.video_label = QLabel()
         self.video_label.setAlignment(Qt.AlignCenter)
-        self.video_label.setMinimumSize(640, 480)
-        self.video_label.setMaximumSize(640*3, 480*3)
+        # self.video_label.setMinimumSize(640, 480)
+        # self.video_label.setMaximumSize(640*3, 480*3)
+        self.video_label.setFixedSize(640 *2, 480*2)
         self.video_layout = QHBoxLayout()
         self.video_layout.addWidget(self.video_label)
 
@@ -43,8 +44,7 @@ class ScreenWidget(QWidget):
 
         self.setLayout(self.main_layout)
 
-        for _ in range(2):
-            self.add_item()
+
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_frame)
@@ -66,7 +66,7 @@ class ScreenWidget(QWidget):
 
     def updateProductsList(self,productsDict: dict = {}):
         self.list_widget.clear()
-        for key, product in productsDict.items():
+        for product in productsDict.values():
             self.add_item(product=product)
 
     def add_item(self, product: Product = None):
@@ -76,10 +76,20 @@ class ScreenWidget(QWidget):
         widget = QWidget()
         layout = QHBoxLayout()
 
-        image_label = QLabel()
-        pixmap = QPixmap(product.image_url)
-        image_label.setPixmap(pixmap)
-        layout.addWidget(image_label)
+        if product.image_url:
+            image_label = QLabel()
+            image = QImage(product.image_url)
+            image.loadFromData(requests.get(product.image_url).content)
+
+            pixmap = QPixmap(image)
+            scaled_pixmap = pixmap.scaled(QSize(100, 100), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            image_label.setPixmap(scaled_pixmap)
+            image_label.setAlignment(Qt.AlignCenter)
+
+            # image_label = QLabel()
+            # pixmap = QPixmap(product.image_url)
+            # image_label.setPixmap(pixmap)
+            layout.addWidget(image_label)
 
         name_label = QLabel(product.name)
         layout.addWidget(name_label)
@@ -112,10 +122,10 @@ class ScreenWidget(QWidget):
         self.list_widget.addItem(item)
         self.list_widget.setItemWidget(item, widget)
 
-        if product.image_url:
-            request = QNetworkRequest(QUrl(product.image_url))
-            request.setAttribute(QNetworkRequest.User, image_label)
-            self.network_manager.get(request)
+        # if product.image_url:
+        #     request = QNetworkRequest(QUrl(product.image_url))
+        #     request.setAttribute(QNetworkRequest.User, image_label)
+        #     self.network_manager.get(request)
     
     def remove_item(self, product: Product):
         item = ListWidgetItem(product.name)
@@ -189,6 +199,7 @@ class Ui_MainWindow(object):
         self.username_label.setGeometry(QtCore.QRect(80, 0, 300, 40))
         self.username_label.setStyleSheet("font: 16pt \"MS Shell Dlg 2\";")
         self.username_label.setObjectName("username_label")
+        self.username_label.setText("")
         self.label_3 = QtWidgets.QLabel(self.frame)
         self.label_3.setGeometry(QtCore.QRect(450, 0, 80, 40))
         self.label_3.setStyleSheet("font: 20pt \"MS Shell Dlg 2\";")

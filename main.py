@@ -26,10 +26,10 @@ class App:
         self.faceDetector = FaceDetector(config=config , ser=ser)
         self.uhdRfidScanner = UhdRfidScanner()
         self.db = ProductDatabase('db.sqlite3')
-        self.uhdRfidScanner.test = True
+        self.uhdRfidScanner.test = False
         self.uhdRfidScanner.connect()
         self.uhdRfidScanner.start()
-        self.faceDetector.index = 1
+        self.faceDetector.index = 0
         self.faceDetector.method = 1
         self.faceDetector.load_faces()
         self.faceDetector.on()
@@ -37,15 +37,16 @@ class App:
 
 
         self.apiBot = ApiBot()
-        self.apiBot.test = True  #--------TEST
+        self.apiBot.test = False  #--------TEST
         self.apiBot.get_access_token()
         self.screen = QApplication(sys.argv)
         self.MainWindow = QtWidgets.QMainWindow()
-        ui = Ui_MainWindow()
-        ui.setupUi(self.MainWindow)
-        ui.widget = ScreenWidget(ui, ui.frame_2, keyPressEvent = self.keyPressEvent)
-        ui.widget.setGeometry(QtCore.QRect(0, 60, 961, 501))
-        ui.widget.update_video = self.update_video
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self.MainWindow)
+        self.screenWidget = self.ui.widget = ScreenWidget(self.ui, self.ui.frame_2, keyPressEvent = self.keyPressEvent)
+
+        self.screenWidget.setGeometry(QtCore.QRect(0, 60, 1240, 960))
+        self.screenWidget.update_video = self.update_video
 
     def start(self):
         self.MainWindow.show()
@@ -58,12 +59,14 @@ class App:
                 'qty': 1,
                 'id': key,
             })
-        res = self.apiBot.purchase_by_user(user = self.currentClient.id ,products=products_data)
-        print("res",res)
-
-
-    def getIdsFromUhfProducts(self,uhf_ids: dict):
-        return [i for i in uhf_ids.keys()]
+        print("request with",self.currentClient.id,products_data)
+        if self.currentClient and len(products_data) > 0:
+            self.ui.username_label.setText("Processing...")
+            res = self.apiBot.purchase_by_user(user = self.currentClient.id ,products=products_data)
+            print("res",res)
+            if res:
+                self.ui.username_label.setText("SUCCESS")
+                # self.ui.username_label.setText("SUCESS")
     
     def update_video(self):
         detected, frame = self.faceDetector.getCurrentFace()
@@ -83,21 +86,28 @@ class App:
 
         if self.hasClient:
             uhf_product_ids = self.uhdRfidScanner.getCurrentData()
-            print("Current UHF", uhf_product_ids)
+            #print("Current UHF", uhf_product_ids)
 
             if len(uhf_product_ids.keys() ) > 0:
-                products = self.db.select_all_by_ids(uhf_ids = uhf_product_ids.keys())
-                print("Current Products", uhf_product_ids,products)
+                products = self.db.select_all_by_ids(uhf_ids = [i for i in uhf_product_ids.keys()])
+                #print("Current Products", products)
                 to_update_list = False
                 for product in products:
                     if not product.id in self.current_session_products.keys():
                         self.current_session_products[product.id] = product
                         to_update_list = True
-                if to_update_list:
+                        print("Updatem list needed")
+
+                if to_update_list: 
                     self.screenWidget.updateProductsList(self.current_session_products)
             elif len(self.current_session_products.keys()) > 0:
-                self.current_session_products.clear()
-                self.screenWidget.updateProductsList()
+                pass
+                #self.current_session_products.clear()
+                #self.screenWidget.updateProductsList()
+        else:
+            self.current_session_products.clear()
+            self.screenWidget.updateProductsList()
+            self.ui.username_label.setText("")
         return True, frame
         
     def add_product(self, product):
@@ -118,7 +128,7 @@ class App:
             product.quantity -= 1
     
     def keyPressEvent(self,event):
-        print(event.key())
+        print("pres",event.key(),Qt.Key_Space)
         if event.key() == 16777248:
             res = self.purchase_products_by_user()
             self.current_session_products = {}

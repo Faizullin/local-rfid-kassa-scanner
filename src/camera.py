@@ -121,7 +121,7 @@ class FaceDetector():
     def getCurrentFace(self):
         ret_frame = None
         if self.current_frame is not None:
-            ret_frame = self.resize(self.current_frame, width=960)  
+            ret_frame = self.resize(self.current_frame, width=1024)  
         return self.current_client_face, ret_frame
 
     def read(self):
@@ -161,17 +161,22 @@ class FaceDetector():
             if matches[best_match_index]:
                 id = self.model['face_names'][best_match_index]
                 if self.prev_client_face_id:
+                    if not self.current_client_face:
+                        self.current_client_face = self.db.select_data_by_id(id)
                     if self.prev_client_face_id == id:
-                        pass
+                        name = self.current_client_face.name
                     else:
                         self.current_client_face = self.db.select_data_by_id(id)
                         self.prev_client_face_id = id
                         name = self.current_client_face.name
                 else:
                     self.current_client_face = self.db.select_data_by_id(id=id)
+                    print("face",id,self.current_client_face,self.current_client_face.name)
                     self.prev_client_face_id = id
                     name = self.current_client_face.name
+                
                 res = self.current_client_face
+
 
             # Draw a rectangle around the face and label it with the name
             top, right, bottom, left = face_location

@@ -9,6 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+import requests
 
 import urllib.request
 from PyQt5.QtCore import Qt, QTimer
@@ -89,9 +90,16 @@ class ScreenWidget(QWidget):
         widget = QWidget()
         layout = QHBoxLayout()
 
-        image_label = QLabel()
-        pixmap = QPixmap(product.image_url)
-        image_label.setPixmap(pixmap)
+        if product.image_url:
+            image_label = QLabel()
+            image = QImage(product.image_url)
+            image.loadFromData(requests.get(product.image_url).content)
+
+            pixmap = QPixmap(image)
+            scaled_pixmap = pixmap.scaled(QSize(100, 100), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        image_label.setPixmap(scaled_pixmap)
+        image_label.setAlignment(Qt.AlignCenter)
+        
         layout.addWidget(image_label)
 
         name_label = QLabel(product.name)
@@ -126,10 +134,10 @@ class ScreenWidget(QWidget):
         self.list_widget.addItem(item)
         self.list_widget.setItemWidget(item, widget)
 
-        if product.image_url:
-            request = QNetworkRequest(QUrl(product.image_url))
-            request.setAttribute(QNetworkRequest.User, image_label)
-            self.network_manager.get(request)
+        # if product.image_url:
+        #     request = QNetworkRequest(QUrl(product.image_url))
+        #     request.setAttribute(QNetworkRequest.User, image_label)
+        #     self.network_manager.get(request)
     
     def remove_item(self, product: Product):
         item = ListWidgetItem(product.name)
@@ -158,7 +166,9 @@ class ScreenWidget(QWidget):
         pass
 
     def handle_image_loaded(self, reply):
+        print("Herer")
         image_label = reply.request().attribute(QNetworkRequest.User)
+       
         if not image_label:
             return
         data = reply.readAll()

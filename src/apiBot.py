@@ -59,6 +59,10 @@ class ApiBot:
         if self.test:
             print(f"Succesfully purchased for user: {user}\n products: [{products}]")
             return
+        print({
+            'user': user,
+            'products': products,
+        })
         return self.protected_request(url = f'{self.base_url}/api/purchase/order_by_bot', data = {
             'user': user,
             'products': products,
@@ -71,6 +75,10 @@ class ApiBot:
             self.refresh_access_token()
             headers = {"Authorization": f"Bearer {self.access_token}"}
             response = requests.post(headers=headers, json=data, cookies=self.get_cookies(), *args,**kwargs)
+        elif response.status_code == 500:
+            with open('error.html','w+',) as f:
+                f.write(response.text)
+
         response.raise_for_status()
         return response.json()
     

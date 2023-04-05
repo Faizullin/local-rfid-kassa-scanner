@@ -12,7 +12,7 @@ if res and "." in res and m:
     ip_camera = f"192.168.{ res.split('.')[2] }.101:4747"
     print("Updated ip camera in:",ip_camera,res)
 
-PREFIX_PATH = os.getcwd() #/home/adminu/Desktop/uhf/local-rfid-kassa-scannerdata
+PREFIX_PATH =  "/home/adminu/Desktop/uhf/local-rfid-kassa-scanner"
 PATHS={
     "db": os.path.join(PREFIX_PATH, os.path.join("db.sqlite3")),
     'faces_path': os.path.join(PREFIX_PATH, os.path.join("data","face_encodings.pickle")),
