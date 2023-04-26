@@ -91,15 +91,3 @@ class ApiBot:
         return self.protected_request(url = f'{self.base_url}/api/user_data_by_bot', data = {
             "id": user_id,
         })
-
-if __name__ == "__main__":
-    url = 'http://127.0.0.1:8000/api/download-db'
-    filename = 'database.db'
-
-    response = requests.get(url)
-    if response.status_code == 200:
-        with open(filename, 'wb') as f:
-            f.write(response.content)
-            print(f'Downloaded {filename} successfully.')
-    else:
-        print(f'Error downloading {filename}: {response.status_code}')

@@ -14,10 +14,45 @@ import requests
 import urllib.request
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QPixmap, QImage
-from PyQt5.QtWidgets import QApplication, QWidget, QListWidget, QListWidgetItem, QHBoxLayout, QLabel, QMessageBox, QPushButton,QVBoxLayout, QSizePolicy
+from PyQt5.QtWidgets import QApplication, QComboBox, QWidget, QListWidget, QListWidgetItem, QHBoxLayout, QLabel, QMessageBox, QPushButton,QVBoxLayout, QSizePolicy
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest
 from PyQt5.QtCore import Qt, QByteArray, QUrl, QSize
 from src.models import Product
+
+
+class DropdownWidget(QWidget):
+
+    def __init__(self):
+        super().__init__()
+
+        self.initUI()
+
+    def initUI(self):
+
+        self.lbl = QLabel('Select an option:', self)
+        self.lbl.move(50, 50)
+
+        self.cb = QComboBox(self)
+        self.cb.move(200, 50)
+        self.cb.addItem('Option 1')
+        self.cb.addItem('Option 2')
+        self.cb.addItem('Option 3')
+        self.cb.activated.connect(self.onActivated)
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.lbl)
+        vbox.addWidget(self.cb)
+
+        self.setLayout(vbox)
+
+        self.setGeometry(300, 300, 350, 200)
+        self.setWindowTitle('PyQt5 dropdown')
+        self.show()
+
+    def onActivated(self, text):
+        self.lbl.setText('You selected: ' + text)
+        self.lbl.adjustSize()
+
 
 
 class ListWidgetItem(QListWidgetItem):
@@ -228,6 +263,10 @@ class Ui_MainWindow(object):
         self.widget.setGeometry(QtCore.QRect(0, 60, 961, 501))
         self.widget.setObjectName("widget")
         self.verticalLayout.addWidget(self.frame_2)
+        
+
+        self.verticalLayout.addWidget(DropdownWidget)
+
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setEnabled(True)
