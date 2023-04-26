@@ -14,9 +14,9 @@ if '-l' in args or '--load' in args:
         sys.exit(1)
 
 conn = sqlite3.connect(path)
-alter_query = ''
-alter_query += 'ALTER TABLE shop_app_product ADD COLUMN uhf_id VARCHAR NULL;'
-alter_query += 'ALTER TABLE shop_app_customuser ADD COLUMN uhf_id VARCHAR NULL;'
+alter_query = 'ALTER TABLE shop_app_product ADD COLUMN uhf_id VARCHAR NULL;'
+conn.execute(alter_query)
+alter_query = 'ALTER TABLE shop_app_customuser ADD COLUMN uhf_id VARCHAR NULL;'
 conn.execute(alter_query)
 conn.commit()
 conn.close()

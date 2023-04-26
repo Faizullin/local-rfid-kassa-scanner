@@ -257,15 +257,22 @@ class Ui_MainWindow(object):
         self.total_price_label.setStyleSheet("font: 16pt \"MS Shell Dlg 2\";")
         self.total_price_label.setObjectName("total_price_label")
         self.total_price_label.setText('0')
+
+        self.dropdown = QComboBox(self.frame)
+        self.dropdown.setGeometry(QtCore.QRect(530, 0, 500, 40))
+        self.dropdown.setStyleSheet("font: 12pt \"MS Shell Dlg 2\";")
+        self.dropdown.addItem('Face Recognition')
+        self.dropdown.addItem('UHF scan')
+        self.dropdown.activated.connect(self.onActivated)
         #self.widget = QtWidgets.QWidget(self.frame_2)
         self.widget = ScreenWidget(self, self.frame_2)
 
-        self.widget.setGeometry(QtCore.QRect(0, 60, 961, 501))
+        self.widget.setGeometry(QtCore.QRect(500, 60, 961, 501))
         self.widget.setObjectName("widget")
         self.verticalLayout.addWidget(self.frame_2)
         
 
-        self.verticalLayout.addWidget(DropdownWidget)
+        #self.verticalLayout.addWidget(DropdownWidget)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -286,7 +293,8 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "User:"))
         self.label_3.setText(_translate("MainWindow", "Total"))
 
-
+    def onActivated(self, text):
+        print(text)
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)

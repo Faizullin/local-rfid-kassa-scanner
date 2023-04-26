@@ -3,7 +3,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import urllib.request, requests
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QPixmap, QImage
-from PyQt5.QtWidgets import QApplication, QWidget, QListWidget, QListWidgetItem, QHBoxLayout, QLabel, QMessageBox, QPushButton,QVBoxLayout, QSizePolicy
+from PyQt5.QtWidgets import QApplication, QComboBox, QWidget, QListWidget, QListWidgetItem, QHBoxLayout, QLabel, QMessageBox, QPushButton,QVBoxLayout, QSizePolicy
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest
 from PyQt5.QtCore import Qt, QByteArray, QUrl, QSize
 from src.models import Product
@@ -34,6 +34,7 @@ class ScreenWidget(QWidget):
         self.video_label.setAlignment(Qt.AlignCenter)
         # self.video_label.setMinimumSize(640, 480)
         # self.video_label.setMaximumSize(640*3, 480*3)
+
         self.video_label.setFixedSize(640 *2, 480*2)
         self.video_layout = QHBoxLayout()
         self.video_layout.addWidget(self.video_label)
@@ -212,6 +213,15 @@ class Ui_MainWindow(object):
         self.total_price_label.setStyleSheet("font: 16pt \"MS Shell Dlg 2\";")
         self.total_price_label.setObjectName("total_price_label")
         self.total_price_label.setText('0')
+
+        self.dropdown = QComboBox(self.frame)
+        self.dropdown.setGeometry(QtCore.QRect(530, 0, 500, 40))
+        self.dropdown.setStyleSheet("font: 12pt \"MS Shell Dlg 2\";")
+        self.dropdown.setObjectName("scan_method_dropdown")
+        self.dropdown.addItem('Face Recognition')
+        self.dropdown.addItem('UHF scan')
+        self.dropdown.activated.connect(self.onActivated)
+        
         #self.widget = QtWidgets.QWidget(self.frame_2)
         self.widget = None#ScreenWidget(self, self.frame_2)
 
@@ -236,6 +246,8 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.label.setText(_translate("MainWindow", "User:"))
         self.label_3.setText(_translate("MainWindow", "Total"))
+    def onActivated(self):
+        pass
 
 
 if __name__ == "__main__":

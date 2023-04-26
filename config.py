@@ -3,16 +3,16 @@ import socket, os
 ip_camera = "http://192.168.1.103:8080/shot.jpg"
 
 
-
-
+m= False
 res = sp.getoutput("hostname -I")
 res = socket.gethostbyname(socket.gethostname())
-m= False
 if res and "." in res and m:
     ip_camera = f"192.168.{ res.split('.')[2] }.101:4747"
     print("Updated ip camera in:",ip_camera,res)
 
-PREFIX_PATH =  "/home/adminu/Desktop/uhf/local-rfid-kassa-scanner"
+PREFIX_PATH = ""
+if m:
+    PREFIX_PATH =  "/home/adminu/Desktop/uhf/local-rfid-kassa-scanner"
 PATHS={
     "db": os.path.join(PREFIX_PATH, os.path.join("data","db.sqlite3")),
     'faces_path': os.path.join(PREFIX_PATH, os.path.join("data","face_encodings.pickle")),

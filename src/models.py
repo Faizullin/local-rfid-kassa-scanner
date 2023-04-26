@@ -20,6 +20,8 @@ class Product:
 class User:
     id = None
     name = ''
-    def __init__(self,id, name):
+    uhf_id= None
+    def __init__(self,id, name, uhf_id=None):
         self.id = id
         self.name = name
+        self.uhf_id = uhf_id

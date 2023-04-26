@@ -31,8 +31,6 @@ class App:
         self.uhdRfidScanner.test = False
         self.uhdRfidScanner.connect()
         self.uhdRfidScanner.start()
-        
-
 
         self.apiBot = ApiBot()
         self.apiBot.test = False  #--------TEST
@@ -40,12 +38,31 @@ class App:
         self.screen = QApplication(sys.argv)
         self.MainWindow = QtWidgets.QMainWindow()
         self.ui = Ui_MainWindow()
+        self.ui.onActivated = self.onMethodChange
         self.ui.setupUi(self.MainWindow)
         self.screenWidget = self.ui.widget = ScreenWidget(self.ui, self.ui.frame_2, keyPressEvent = self.keyPressEvent)
 
         self.screenWidget.setGeometry(QtCore.QRect(0, 60, 1240, 960))
         self.screenWidget.app_update = self.update
 
+    def onMethodChange(self, value):
+        value = int(value)
+        if value == 0:
+            self.uhdRfidScanner.off()
+            try:
+                app.faceDetector.on()
+                ret, data = app.faceDetector.read()
+                app.faceDetector.load_faces()
+                self.scanMethod = 0
+            except Exception as err:
+                ser.die(str(err))
+                app.faceDetector.off()
+                self.scanMethod = 1
+            
+        elif value == 1:
+            self.uhdRfidScanner.on()
+            self.scanMethod = 1
+    
     def start(self):
         self.MainWindow.show()
         sys.exit(self.screen.exec_())
@@ -78,15 +95,16 @@ class App:
     def update_uhf_user(self):
         uhf_product_ids = self.uhdRfidScanner.getCurrentData()
         if len(uhf_product_ids.keys() > 0):
-            uhf_id, user = self.user_db.find_user_in_ids([i for i in uhf_product_ids.keys()])
+            user = self.user_db.find_user_in_ids([i for i in uhf_product_ids.keys()])
             if user is not None:
-                del uhf_product_ids[uhf_id]
+                del uhf_product_ids[user.uhf_id]
                 self.hasClient = True
                 self.currentClient = user
                 self.scanSatate = 0
             elif self.scanSatate > 4:
                 self.hasClient = False
                 self.scanSatate = 0
+                self.currentClient = None
             else:
                 self.scanSatate += 1
             if self.hasClient:
@@ -120,6 +138,7 @@ class App:
         elif self.scanSatate > 4:
             self.hasClient = False
             self.scanSatate = 0
+            self.currentClient = None
             self.uhdRfidScanner.off()
         else:
             self.scanSatate += 1
@@ -183,8 +202,4 @@ if __name__ == '__main__':
     app.scanMethod = 1
     app.faceDetector.index = 0
     app.faceDetector.method = 1
-    if app.scanMethod == 0:
-        app.faceDetector.load_faces()
-        app.faceDetector.on()
-        app.faceDetector.start()
     app.start()

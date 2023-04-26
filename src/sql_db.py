@@ -79,6 +79,6 @@ class UserDatabase(Database):
         self.c.execute(query,(ids,))
         items = self.c.fetchall()
         if not items or len(items) == 0:
-            return None, None
+            return None
         else:
-            return items[0][2], User(id=items[0][0], name=items[0][1])
+            return User(id=items[0][0], name=items[0][1], uhf_id=items[0][2])
