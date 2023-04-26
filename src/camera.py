@@ -69,6 +69,7 @@ class FaceDetector():
     camera_index = 0
     state=False
     method = 1
+    index = 0
     model = {
         'face_encodings': None,
         'face_names': None

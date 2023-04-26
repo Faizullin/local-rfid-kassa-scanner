@@ -73,3 +73,12 @@ class UserDatabase(Database):
         self.c.execute(query,(id,))
         item = self.c.fetchone()
         return User(id=item[0], name=item[1])
+
+    def find_user_in_ids(self, ids):
+        query = f"SELECT `id`,`username`,`uhf_id` FROM 'shop_app_customuser' WHERE id IN { ''.join(['?' for _ in len(ids)]) }"
+        self.c.execute(query,(ids,))
+        items = self.c.fetchall()
+        if not items or len(items) == 0:
+            return None, None
+        else:
+            return items[0][2], User(id=items[0][0], name=items[0][1])

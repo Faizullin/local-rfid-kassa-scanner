@@ -44,19 +44,22 @@ class ScreenWidget(QWidget):
 
         self.setLayout(self.main_layout)
 
-
-
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(50)
 
     def update_frame(self):
-        ret, frame = self.update_video()
-        if ret:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            h, w, c = frame.shape
-            q_img = QPixmap.fromImage(QImage(frame.data, w, h, c*w, QImage.Format_RGB888))
-            self.video_label.setPixmap(q_img)
+        method, ret, frame = self.app_update()
+        if method == 0:
+            if ret:
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                h, w, c = frame.shape
+                q_img = QPixmap.fromImage(QImage(frame.data, w, h, c*w, QImage.Format_RGB888))
+                self.video_label.setPixmap(q_img)
+        elif method == 1:
+            pass
+    def app_update(self):
+        pass
     
     def show_frame(self,frame):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

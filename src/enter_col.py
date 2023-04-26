@@ -4,8 +4,9 @@ import sqlite3
 conn = sqlite3.connect('db.sqlite3')
 
 # Define the SQL query to add a new column to the table
-alter_query = 'ALTER TABLE shop_app_product ADD COLUMN uhf_id VARCHAR NULL'
-
+alter_query = ''
+alter_query += 'ALTER TABLE shop_app_product ADD COLUMN uhf_id VARCHAR NULL;'
+alter_query += 'ALTER TABLE shop_app_customuser ADD COLUMN uhf_id VARCHAR NULL;'
 # Execute the SQL query
 conn.execute(alter_query)
 
