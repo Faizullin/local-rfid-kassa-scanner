@@ -17,7 +17,7 @@ PATHS={
     "db": os.path.join(PREFIX_PATH, os.path.join("data","db.sqlite3")),
     'faces_path': os.path.join(PREFIX_PATH, os.path.join("data","face_encodings.pickle")),
     'driver': os.path.join(PREFIX_PATH, "data/driver/raspberry/libCFComApi.so"),
-    'train_model': os.path.join(PREFIX_PATH, "data/face_encodings.pickle"),
+    'train_model': os.path.join(PREFIX_PATH, os.path.join("data","face_encodings.pickle")),
     "urls":{
         'imgin' : ip_camera,
         "api": "https://rfid-kassa.com"
@@ -27,7 +27,8 @@ PATHS={
 camera_settings={
     'devices':{
         0: 0,
-        1: ip_camera
+        1: ip_camera,
+        2: 2
     },
 }
 

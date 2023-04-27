@@ -4,7 +4,7 @@ import datetime,requests,sys,face_recognition,os,cv2,time,pickle
 from threading import Thread
 from .models import User
 from .sql_db import UserDatabase
-
+import config
 __all__=['WebCamera','LocalCamera','FaceDetector']
 
 
@@ -86,7 +86,7 @@ class FaceDetector():
             else:
                 raise Exception("wrong camera path/index");
         self.faces_path = config.PATHS['faces_path']
-        self.db = UserDatabase()
+        self.db = UserDatabase(config.PATHS['db'])
         print(self.devices)
         
     def on(self):
@@ -99,7 +99,7 @@ class FaceDetector():
         Thread(target = self.run,daemon=True).start()
 
     def run(self):
-        self.db = UserDatabase()
+        self.db = UserDatabase(config.PATHS['db'])
         while True:
             if not self.state:
                 time.sleep(1)
@@ -153,7 +153,7 @@ class FaceDetector():
         face_encodings = face_recognition.face_encodings(rgb_frame, face_locations, model='large')
         # Loop through each face in the frame and compare it to the pre-trained encodings
         for face_encoding, face_location in zip(face_encodings, face_locations):
-
+            # print(self.model['face_encodings'], face_encoding,0.6)
             matches = face_recognition.compare_faces(self.model['face_encodings'], face_encoding,tolerance=0.6)
             name="Unknown"
             face_distances = face_recognition.face_distance(self.model['face_encodings'],face_encoding)
@@ -192,6 +192,7 @@ class FaceDetector():
             face_encodings, face_names = pickle.load(f)
             self.model['face_encodings'] = face_encodings
             self.model['face_names'] = face_names
+            # print(self.model['face_encodings'])
     # def __del__(self):
     #     cv2.destroyAllWindows();
 

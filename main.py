@@ -47,6 +47,7 @@ class App:
 
     def onMethodChange(self, value):
         value = int(value)
+        
         if value == 0:
             self.uhdRfidScanner.off()
             try:
@@ -85,6 +86,7 @@ class App:
     
 
     def update(self):
+        # print(self.scanMethod)
         if self.scanMethod == 0:
             return self.scanMethod, self.update_video()
         elif self.scanMethod == 1:
@@ -94,6 +96,7 @@ class App:
         
     def update_uhf_user(self):
         uhf_product_ids = self.uhdRfidScanner.getCurrentData()
+        # print(uhf_product_ids,self.user_db.find_user_in_ids([i for i in uhf_product_ids.keys()]))
         if len(uhf_product_ids.keys()) > 0:
             user = self.user_db.find_user_in_ids([i for i in uhf_product_ids.keys()])
             if user is not None:
@@ -101,7 +104,7 @@ class App:
                 self.hasClient = True
                 self.currentClient = user
                 self.scanSatate = 0
-            elif self.scanSatate > 4:
+            elif self.scanSatate > 200:
                 self.hasClient = False
                 self.scanSatate = 0
                 self.currentClient = None
@@ -157,7 +160,7 @@ class App:
                     if not product.id in self.current_session_products.keys():
                         self.current_session_products[product.id] = product
                         to_update_list = True
-                        print("Update list needed")
+                        # print("Update list needed")
 
                 if to_update_list: 
                     self.screenWidget.updateProductsList(self.current_session_products)
@@ -200,7 +203,10 @@ class App:
 
 if __name__ == '__main__':
     app = App()
-    app.scanMethod = 1
-    app.faceDetector.index = 0
+    app.scanMethod = 0
+    app.faceDetector.index = 2
     app.faceDetector.method = 1
+    app.faceDetector.on()
+    app.faceDetector.load_faces()
+    app.faceDetector.start()
     app.start()
