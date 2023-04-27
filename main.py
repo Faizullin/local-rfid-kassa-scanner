@@ -23,17 +23,17 @@ class App:
     scanMethod = 0
 
 
-    def __init__(self):
+    def __init__(self, test = False):
         self.faceDetector = FaceDetector(config=config , ser=ser)
         self.uhdRfidScanner = UhdRfidScanner()
         self.db = ProductDatabase(config.PATHS['db'])
         self.user_db = UserDatabase(config.PATHS['db'])
-        self.uhdRfidScanner.test = False
+        self.uhdRfidScanner.test = test
         self.uhdRfidScanner.connect()
         self.uhdRfidScanner.start()
 
         self.apiBot = ApiBot()
-        self.apiBot.test = False  #--------TEST
+        self.apiBot.test = test
         self.apiBot.get_access_token()
         self.screen = QApplication(sys.argv)
         self.MainWindow = QtWidgets.QMainWindow()
@@ -47,20 +47,21 @@ class App:
 
     def onMethodChange(self, value):
         value = int(value)
-        
         if value == 0:
             self.uhdRfidScanner.off()
             try:
-                app.faceDetector.on()
+                self.faceDetector.off()
                 ret, data = app.faceDetector.read()
-                app.faceDetector.load_faces()
+                self.faceDetector.load_faces()
                 self.scanMethod = 0
+                self.faceDetector.on()
             except Exception as err:
                 ser.die(str(err))
-                app.faceDetector.off()
+                self.faceDetector.off()
                 self.scanMethod = 1
             
         elif value == 1:
+            self.faceDetector.off()
             self.uhdRfidScanner.on()
             self.scanMethod = 1
     
@@ -203,10 +204,10 @@ class App:
         self.faceDetector.off()
 
 if __name__ == '__main__':
-    app = App()
+    app = App(test= True)
     app.scanMethod = 0
     if app.scanMethod == 0:
-        app.faceDetector.index = 2
+        app.faceDetector.index = 0
         app.faceDetector.method = 1
         app.faceDetector.on()
         app.faceDetector.load_faces()

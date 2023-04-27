@@ -28,7 +28,7 @@ class UhdRfidScanner:
 
     def connect(self):
         if self.test:
-            print("OpenSuccess")
+            print("OpenSuccess test")
             return
         self.Objdll = ctypes.cdll.LoadLibrary(self.PATH_TO_DRIVER)
         print(self.Objdll)
@@ -48,7 +48,7 @@ class UhdRfidScanner:
                 continue
             self.current_data = {}
             if self.test:
-                self.current_data = {'1':1,'3':1, '4': 1}
+                self.current_data = {'0xe2 0x80 0x68 0x94 0x0 0x0 0x40 0x6 0xe5 0xf6 0x21 0x42 ':1,'0xe2 0x80 0x68 0x94 0x0 0x0 0x40 0x6 0xe5 0xf6 0x25 0x15 ':1, '0xe2 0x80 0x68 0x94 0x0 0x0 0x50 0x6 0xe5 0xf6 0x21 0x10 ': 1}
                 time.sleep(2)
                 continue
 
