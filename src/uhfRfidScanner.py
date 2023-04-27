@@ -48,7 +48,7 @@ class UhdRfidScanner:
                 continue
             self.current_data = {}
             if self.test:
-                self.current_data = {'1':1,'2':1}
+                self.current_data = {'1':1,'3':1, '4': 1}
                 time.sleep(2)
                 continue
 

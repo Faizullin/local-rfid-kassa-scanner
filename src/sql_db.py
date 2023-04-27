@@ -75,8 +75,8 @@ class UserDatabase(Database):
         return User(id=item[0], name=item[1])
 
     def find_user_in_ids(self, ids):
-        query = f"SELECT `id`,`username`,`uhf_id` FROM 'shop_app_customuser' WHERE id IN { ''.join(['?' for _ in len(ids)]) }"
-        self.c.execute(query,(ids,))
+        query = f"SELECT `id`,`username`,`uhf_id` FROM 'shop_app_customuser' WHERE id IN ({ ', '.join(map(str, ids)) })"
+        self.c.execute(query)
         items = self.c.fetchall()
         if not items or len(items) == 0:
             return None

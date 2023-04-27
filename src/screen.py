@@ -50,7 +50,7 @@ class ScreenWidget(QWidget):
         self.timer.start(50)
 
     def update_frame(self):
-        method, ret, frame = self.app_update()
+        method, (ret, frame) = self.app_update()
         if method == 0:
             if ret:
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -60,7 +60,7 @@ class ScreenWidget(QWidget):
         elif method == 1:
             pass
     def app_update(self):
-        pass
+        return False, None, None
     
     def show_frame(self,frame):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -70,6 +70,7 @@ class ScreenWidget(QWidget):
 
     def updateProductsList(self,productsDict: dict = {}):
         self.list_widget.clear()
+        self.ui.total_price_label.setText("0")
         for product in productsDict.values():
             self.add_item(product=product)
 
@@ -102,7 +103,7 @@ class ScreenWidget(QWidget):
         total_price_label = QLabel(str(total_price))
         layout.addWidget(total_price_label)
 
-        self.ui.total_price_label.setText(str( int(self.ui.total_price_label.text()) + total_price ))
+        self.ui.total_price_label.setText(str( float(self.ui.total_price_label.text()) + float(total_price) ))
 
         count_label = QLabel(str(product.quantity))
         layout.addWidget(count_label)
@@ -141,7 +142,7 @@ class ScreenWidget(QWidget):
         total_price = product.price * count
         count_label.setText(str(count))
         total_price_label.setText(str(total_price))
-        self.ui.total_price_label.setText(str( int(self.ui.total_price_label.text()) + product.price))
+        self.ui.total_price_label.setText(str( float(self.ui.total_price_label.text()) + float(product.price)))
 
 
     def decrement_count(self, count_label, total_price_label, product):
@@ -152,7 +153,7 @@ class ScreenWidget(QWidget):
         total_price = product.price * count
         count_label.setText(str(count))
         total_price_label.setText(str(total_price))
-        self.ui.total_price_label.setText(str( int(self.ui.total_price_label.text()) - product.price))
+        self.ui.total_price_label.setText(str( float(self.ui.total_price_label.text()) - float(product.price)))
 
     def keyPressEvent(self, event):
         pass
@@ -215,7 +216,7 @@ class Ui_MainWindow(object):
         self.total_price_label.setText('0')
 
         self.dropdown = QComboBox(self.frame)
-        self.dropdown.setGeometry(QtCore.QRect(530, 0, 500, 40))
+        self.dropdown.setGeometry(QtCore.QRect(630, 0, 500, 40))
         self.dropdown.setStyleSheet("font: 12pt \"MS Shell Dlg 2\";")
         self.dropdown.setObjectName("scan_method_dropdown")
         self.dropdown.addItem('Face Recognition')

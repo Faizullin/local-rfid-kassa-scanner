@@ -26,8 +26,8 @@ class App:
     def __init__(self):
         self.faceDetector = FaceDetector(config=config , ser=ser)
         self.uhdRfidScanner = UhdRfidScanner()
-        self.db = ProductDatabase('db.sqlite3')
-        self.user_db = UserDatabase('db.sqlite3')
+        self.db = ProductDatabase(config.PATHS['db'])
+        self.user_db = UserDatabase(config.PATHS['db'])
         self.uhdRfidScanner.test = False
         self.uhdRfidScanner.connect()
         self.uhdRfidScanner.start()
@@ -94,7 +94,7 @@ class App:
         
     def update_uhf_user(self):
         uhf_product_ids = self.uhdRfidScanner.getCurrentData()
-        if len(uhf_product_ids.keys() > 0):
+        if len(uhf_product_ids.keys()) > 0:
             user = self.user_db.find_user_in_ids([i for i in uhf_product_ids.keys()])
             if user is not None:
                 del uhf_product_ids[user.uhf_id]
@@ -107,22 +107,23 @@ class App:
                 self.currentClient = None
             else:
                 self.scanSatate += 1
-            if self.hasClient:
-                if len(uhf_product_ids.keys() ) > 0:
-                    products = self.db.select_all_by_ids(uhf_ids = [i for i in uhf_product_ids.keys()])
-                    to_update_list = False
-                    for product in products:
-                        if not product.id in self.current_session_products.keys():
-                            self.current_session_products[product.id] = product
-                            to_update_list = True
-                            print("Update list needed")
+        if self.hasClient:
+            self.ui.username_label.setText(self.currentClient.name)
+            if len(uhf_product_ids.keys() ) > 0:
+                products = self.db.select_all_by_ids(uhf_ids = [i for i in uhf_product_ids.keys()])
+                to_update_list = False
+                for product in products:
+                    if not product.id in self.current_session_products.keys():
+                        self.current_session_products[product.id] = product
+                        to_update_list = True
+                        print("Update list needed")
 
-                    if to_update_list: 
-                        self.screenWidget.updateProductsList(self.current_session_products)
-            else:
-                self.current_session_products.clear()
-                self.screenWidget.updateProductsList()
-                self.ui.username_label.setText("")
+                if to_update_list:
+                    self.screenWidget.updateProductsList(self.current_session_products)
+        else:
+            self.current_session_products.clear()
+            self.screenWidget.updateProductsList()
+            self.ui.username_label.setText("")
         return True, None
 
 

@@ -15,5 +15,4 @@ elif '--migrate' in args or '-m' in args:
     cmd += args
 else:
     cmd.append('main.py')
-print(cmd)
 subprocess.run(cmd)
