@@ -139,7 +139,7 @@ class App:
             self.currentClient = detected
             self.scanSatate = 0
             self.uhdRfidScanner.on()
-        elif self.scanSatate > 4:
+        elif self.scanSatate > 10:
             self.hasClient = False
             self.scanSatate = 0
             self.currentClient = None
@@ -149,8 +149,9 @@ class App:
         
 
         if self.hasClient:
+
             uhf_product_ids = self.uhdRfidScanner.getCurrentData()
-            #print("Current UHF", uhf_product_ids)
+            self.ui.username_label.setText(self.currentClient.name)
 
             if len(uhf_product_ids.keys() ) > 0:
                 products = self.db.select_all_by_ids(uhf_ids = [i for i in uhf_product_ids.keys()])
@@ -204,9 +205,12 @@ class App:
 if __name__ == '__main__':
     app = App()
     app.scanMethod = 0
-    app.faceDetector.index = 2
-    app.faceDetector.method = 1
-    app.faceDetector.on()
-    app.faceDetector.load_faces()
-    app.faceDetector.start()
+    if app.scanMethod == 0:
+        app.faceDetector.index = 2
+        app.faceDetector.method = 1
+        app.faceDetector.on()
+        app.faceDetector.load_faces()
+        app.faceDetector.start()
+    elif app.scanMethod == 1:
+        app.uhdRfidScanner.on()
     app.start()

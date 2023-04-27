@@ -11,8 +11,6 @@ if res and "." in res and m:
     print("Updated ip camera in:",ip_camera,res)
 
 PREFIX_PATH = ""
-if m:
-    PREFIX_PATH =  "/home/adminu/Desktop/uhf/local-rfid-kassa-scanner"
 PATHS={
     "db": os.path.join(PREFIX_PATH, os.path.join("data","db.sqlite3")),
     'faces_path': os.path.join(PREFIX_PATH, os.path.join("data","face_encodings.pickle")),
