@@ -1,26 +1,22 @@
 import subprocess as sp
-import socket
+import socket, os
 ip_camera = "http://192.168.1.103:8080/shot.jpg"
 
 
-
-
+m= False
 res = sp.getoutput("hostname -I")
 res = socket.gethostbyname(socket.gethostname())
-m= False
 if res and "." in res and m:
-    ip_camera = f"192.168.{ res.split('.')[2] }.103:4747"
+    ip_camera = f"192.168.{ res.split('.')[2] }.101:4747"
     print("Updated ip camera in:",ip_camera,res)
-    
-#ENABLE_ACCOUNT = 'https://myaccount.google.com/lesssecureapps?pli=1&rapt=AEjHL4OCX7qsNoB5qwZmOXuzjiyqPPY65E6x-NCYKREntcOhDo8tBWgQU0kPqTccNDabUzDNZ2lPYMz0LGGSPL7JMfhb77-Ueg'
+
+PREFIX_PATH = ""
 PATHS={
-    "db":"data/db/main.db",
-    'events':'data/config/events.txt',
-    'info':'data/config/info.json',
-    "DCIM":"data/DCIM/",
-    'faces_path': "data/models.faces.pickle",
+    "db": os.path.join(PREFIX_PATH, os.path.join("data","db.sqlite3")),
+    'faces_path': os.path.join(PREFIX_PATH, os.path.join("data","face_encodings.pickle")),
+    'driver': os.path.join(PREFIX_PATH, "data/driver/raspberry/libCFComApi.so"),
+    'train_model': os.path.join(PREFIX_PATH, os.path.join("data","face_encodings.pickle")),
     "urls":{
-        #"esp":f"http://192.168.{ip}.7/",
         'imgin' : ip_camera,
         "api": "https://rfid-kassa.com"
     }
@@ -29,7 +25,8 @@ PATHS={
 camera_settings={
     'devices':{
         0: 0,
-        1: ip_camera
+        1: ip_camera,
+        2: 2
     },
 }
 

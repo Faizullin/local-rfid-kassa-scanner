@@ -1,8 +1,10 @@
 from urllib.request import urlopen
-import numpy as np;
+import numpy as np, config
 import datetime,requests,sys,face_recognition,os,cv2,time,pickle
 from threading import Thread
-
+from .models import User
+from .sql_db import UserDatabase
+import config
 __all__=['WebCamera','LocalCamera','FaceDetector']
 
 
@@ -62,9 +64,12 @@ class LocalCamera(Camera):
 
 class FaceDetector():
     current_frame = None
+    current_client_face = None
+    prev_client_face_id = None
     camera_index = 0
     state=False
     method = 1
+    index = 0
     model = {
         'face_encodings': None,
         'face_names': None
@@ -81,6 +86,7 @@ class FaceDetector():
             else:
                 raise Exception("wrong camera path/index");
         self.faces_path = config.PATHS['faces_path']
+        self.db = UserDatabase(config.PATHS['db'])
         print(self.devices)
         
     def on(self):
@@ -88,17 +94,18 @@ class FaceDetector():
 
     def off(self):
         self.state = False;
-        cv2.destroyAllWindows();
+
+    def start(self):
+        Thread(target = self.run,daemon=True).start()
 
     def run(self):
+        self.db = UserDatabase(config.PATHS['db'])
         while True:
             if not self.state:
                 time.sleep(1)
                 continue
-            ret,frame = self.devices[self.index].read()
-
+            ret,frame = self.read()
             if not ret: 
-                self.ser.die("No frame")
                 continue
             frame = self.resize(frame, width=500)
             if self.method == 0:
@@ -107,28 +114,24 @@ class FaceDetector():
             else:
                 detected=False
                 if self.method == 1:
-                    detected,frame = self.detect_face(frame)
-                    self.current_frame = frame
-                    if detected:
-                        print(f"Found {detected}")
+                    self.current_client_face, self.current_frame = self.detect_face(frame)
                 if self.delay:
                     self.sleep(self.delay)
-                if detected!=False:
-                    pass
-            # cv2.imshow("FRAME",frame)
-            # if cv2.waitKey(1) == ord('q'):
-            #     self.off()
-            #     return
 
+
+    def getCurrentFace(self):
+        ret_frame = None
+        if self.current_frame is not None:
+            ret_frame = self.resize(self.current_frame, width=1024)  
+        return self.current_client_face, ret_frame
 
     def read(self):
-        #return self.current_frame is not None, self.current_frame
         ret,frame = self.devices[self.index].read()
         if not ret: 
             self.ser.die("No frame")
             self.off()
             return False,None
-        return ret,frame;
+        return ret,frame
 
     def resize(self,img,width=None,inter=cv2.INTER_AREA):
         (h,w)=img.shape[:2]
@@ -141,39 +144,56 @@ class FaceDetector():
         time.sleep(delay)
         
     def detect_face(self,frame):
+        
         res=False
         rgb_frame = frame[:, :, ::-1]
-
+        
         # Find the face locations and encodings in the frame
         face_locations = face_recognition.face_locations(rgb_frame, model='hog')
         face_encodings = face_recognition.face_encodings(rgb_frame, face_locations, model='large')
-
         # Loop through each face in the frame and compare it to the pre-trained encodings
         for face_encoding, face_location in zip(face_encodings, face_locations):
-
+            # print(self.model['face_encodings'], face_encoding,0.6)
             matches = face_recognition.compare_faces(self.model['face_encodings'], face_encoding,tolerance=0.6)
             name="Unknown"
             face_distances = face_recognition.face_distance(self.model['face_encodings'],face_encoding)
             best_match_index = np.argmin(face_distances)
+            
             if matches[best_match_index]:
-                name = self.model['face_names'][best_match_index]
-                res = True
+                id = self.model['face_names'][best_match_index]
+                if self.prev_client_face_id:
+                    if not self.current_client_face:
+                        self.current_client_face = self.db.select_data_by_id(id)
+                    if self.prev_client_face_id == id:
+                        name = self.current_client_face.name
+                    else:
+                        self.current_client_face = self.db.select_data_by_id(id)
+                        self.prev_client_face_id = id
+                        name = self.current_client_face.name
+                else:
+                    self.current_client_face = self.db.select_data_by_id(id=id)
+                    print("face",id,self.current_client_face,self.current_client_face.name)
+                    self.prev_client_face_id = id
+                    name = self.current_client_face.name
+                
+                res = self.current_client_face
+
 
             # Draw a rectangle around the face and label it with the name
             top, right, bottom, left = face_location
             cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
-            cv2.putText(frame, name, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            
-
+            cv2.putText(frame, name , (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             
         
         return res,frame
 
     def load_faces(self):
-        with open("data/face_encodings.pickle", "rb") as f:
+        with open(config.PATHS['train_model'], "rb") as f:
             face_encodings, face_names = pickle.load(f)
             self.model['face_encodings'] = face_encodings
             self.model['face_names'] = face_names
-
+            # print(self.model['face_encodings'])
+    # def __del__(self):
+    #     cv2.destroyAllWindows();
 
     

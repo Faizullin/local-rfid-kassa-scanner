@@ -3,7 +3,8 @@ import os
 import pickle,cv2
 
 # Define the path to the directory containing the face images
-faces_dir = "data\\train_face"
+PREFIX_PATH = os.getcwd()
+faces_dir = os.path.join(PREFIX_PATH, "data/train_face")
 
 # Create lists to store the face encodings and corresponding names
 train_face_encodings = []
@@ -29,6 +30,6 @@ for filename in os.listdir(faces_dir):
         train_face_names.append(filename.split(".")[0])
 
 
-with open("data\\face_encodings.pickle", "wb") as f:
+with open(os.path.join(PREFIX_PATH, "data/face_encodings.pickle"), "wb") as f:
     print("Data",train_face_names,len(train_face_encodings))
     pickle.dump((train_face_encodings, train_face_names), f)
